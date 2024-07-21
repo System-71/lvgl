@@ -246,7 +246,7 @@ static lv_draw_buf_t * decode_png_data(const void * png_data, size_t png_data_si
     unsigned png_height;            /*Not used, just required by the decoder*/
     lv_draw_buf_t * decoded = NULL;
 
-    /*Decode the image in ARGB8888 */
+    /*Decode the image in ARGB888 */
     unsigned error = lodepng_decode32((unsigned char **)&decoded, &png_width, &png_height, png_data, png_data_size);
     if(error) {
         if(decoded != NULL)  lv_draw_buf_destroy(decoded);
@@ -254,7 +254,9 @@ static lv_draw_buf_t * decode_png_data(const void * png_data, size_t png_data_si
     }
 
     /*Convert the image to the system's color depth*/
-    convert_color_depth(decoded->data,  png_width * png_height);
+    if (LV_COLOR_DEPTH == 16) {
+        convert_color_depth(decoded->data,  png_width * png_height);        
+    }
 
     return decoded;
 }
@@ -266,12 +268,17 @@ static lv_draw_buf_t * decode_png_data(const void * png_data, size_t png_data_si
  */
 static void convert_color_depth(uint8_t * img_p, uint32_t px_cnt)
 {
-    lv_color32_t * img_argb = (lv_color32_t *)img_p;
+    uint16_t* buf = (uint16_t *) img_p;
     uint32_t i;
+    uint8_t r,g,b=0;
     for(i = 0; i < px_cnt; i++) {
-        uint8_t blue = img_argb[i].blue;
-        img_argb[i].blue = img_argb[i].red;
-        img_argb[i].red = blue;
+
+        r = img_p[i *4 + 0] / 8;
+        g = img_p[i *4 + 1] / 4;
+        b = img_p[i *4 + 2] / 8;
+
+        buf[0] = ((r << 11)|(g<<5)|(b)) & 0xFFFF; // convert to RGB565
+        buf ++;
     }
 }
 
