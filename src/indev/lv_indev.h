@@ -55,6 +55,7 @@ typedef struct {
     int16_t enc_diff; /**< For LV_INDEV_TYPE_ENCODER number of steps since the previous read*/
 
     lv_indev_state_t state; /**< LV_INDEV_STATE_RELEASED or LV_INDEV_STATE_PRESSED*/
+    lv_indev_state_t button_state; /**< LV_INDEV_STATE_RELEASED or LV_INDEV_STATE_PRESSED, tracks hardware state*/
     bool continue_reading;  /**< If set to true, the read callback is invoked again, unless the device is in event-driven mode*/
 } lv_indev_data_t;
 
